@@ -1,6 +1,6 @@
 import { createMcpHandler } from "agents/mcp/server";
 import { Effect } from "effect";
-import { loadConfig, type Bindings } from "./config";
+import { ConfigurationError, loadConfig, type Bindings } from "./config";
 import { createServer } from "./mcp";
 
 function jsonError(status: number, message: string) {
@@ -29,12 +29,14 @@ export default {
     try {
       const config = await Effect.runPromise(
         loadConfig(env).pipe(Effect.match({
-          onFailure: () => undefined,
+          onFailure: (error) => error,
           onSuccess: (value) => value,
         })),
         { signal: request.signal },
       );
-      if (config === undefined) return jsonError(503, "The service is not configured.");
+      if (config instanceof ConfigurationError) {
+        return jsonError(503, `The service is not configured: ${config.fields.join(", ")}.`);
+      }
       if (!validToken(request.headers.get("Authorization"), config.authToken)) {
         return jsonError(401, "Authentication required.");
       }

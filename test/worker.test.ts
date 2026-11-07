@@ -106,7 +106,21 @@ describe("routing, authentication and configuration", () => {
   it("returns 503 when the service is not configured", async () => {
     const response = await dispatch(request("tools/list"), {});
     expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({
+      error: "The service is not configured: RIPE_ATLAS_API_KEY, MCP_AUTH_TOKEN.",
+    });
     expect(outgoing).not.toHaveBeenCalled();
+  });
+
+  it("names the invalid binding in the 503, without leaking its value", async () => {
+    const response = await dispatch(request("tools/list"), {
+      RIPE_ATLAS_API_KEY: "not a valid key",
+      MCP_AUTH_TOKEN: "test-mcp-token-with-at-least-32-characters",
+    });
+    expect(response.status).toBe(503);
+    const body = z.object({ error: z.string() }).parse(await response.json());
+    expect(body.error).toContain("RIPE_ATLAS_API_KEY");
+    expect(body.error).not.toContain("not a valid key");
   });
 
   it("lists all tools", async () => {
