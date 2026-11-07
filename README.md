@@ -81,7 +81,7 @@ The checked-in `wrangler.jsonc` targets an existing personal deployment. Before 
    bun run deploy
    ```
 
-The Worker uses a `workers.dev` hostname; preview URLs are disabled. `/favicon.svg` is public so clients can display an icon. `/mcp` always requires authentication.
+The Worker uses a `workers.dev` hostname; preview URLs are disabled. `/favicon.ico` (the official RIPE Atlas icon) is public so clients like Vibe Work can display it. `/mcp` always requires authentication.
 
 ## Connect a client
 
