@@ -266,7 +266,7 @@ export const AtlasLive = (config: Config) => {
           is_oneoff: input.is_oneoff,
           ...(input.bill_to === undefined ? {} : { bill_to: input.bill_to }),
         });
-        yield* Schema.decodeUnknownEffect(Schema.Array(HasId))(body).pipe(
+        yield* Schema.decodeUnknownEffect(Schema.Union([HasId, Schema.Array(HasId)]))(body).pipe(
           Effect.mapError(invalidResponse),
         );
         return { created: body };
