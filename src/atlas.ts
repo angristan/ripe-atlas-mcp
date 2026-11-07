@@ -185,7 +185,10 @@ export const AtlasLive = (config: Config) => {
     while (pagesFetched < maxPages) {
       const body = yield* request("GET", url, undefined);
       const envelope = yield* Schema.decodeUnknownEffect(ListEnvelope)(body).pipe(
-        Effect.mapError(invalidResponse),
+        Effect.mapError(() => new AtlasError({
+          code: "InvalidResponse",
+          message: `Unexpected list response from ${url}: ${JSON.stringify(body)?.slice(0, 300)}`,
+        })),
       );
       count = envelope.count;
       results.push(...envelope.results);
