@@ -208,7 +208,7 @@ describe("tools", () => {
   it("create_measurement posts definitions and probes and returns created IDs", async () => {
     reply([{ id: 111, status: "Ongoing" }]);
     const result = await call("create_measurement", {
-      definitions: [{ type: "ping", target: "example.com", packets: 3 }],
+      definitions: [{ type: "ping", target: "example.com", af: 4, packets: 3 }],
       probes: [{ type: "country", value: "NL", requested: 10 }],
       is_oneoff: true,
     });
@@ -292,7 +292,7 @@ describe("atlas error detail", () => {
   it("includes the raw body for 400 validation errors without a detail string", async () => {
     reply({ definitions: ["This field is required."] }, 400);
     const result = await call("create_measurement", {
-      definitions: [{ type: "ping", target: "example.com" }],
+      definitions: [{ type: "ping", target: "example.com", af: 4 }],
       probes: [{ type: "country", value: "FR", requested: 5 }],
     });
     expect(result.isError).toBe(true);

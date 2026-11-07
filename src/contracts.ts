@@ -50,7 +50,7 @@ const definition = z.looseObject({
   type: measurementType,
   target: z.string().min(1).max(500),
   description: z.string().max(200).optional(),
-  af: z.union([z.literal(4), z.literal(6)]).optional(),
+  af: z.union([z.literal(4), z.literal(6)]).describe("Address family: 4 or 6. Required by the Atlas API."),
   interval: z.number().int().positive().optional(),
   packets: z.number().int().min(1).max(16).optional(),
   timeout: z.number().int().positive().optional(),
