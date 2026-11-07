@@ -287,3 +287,15 @@ function sentRequestAt(index: number) {
     }).parse(init),
   };
 }
+
+describe("atlas error detail", () => {
+  it("includes the raw body for 400 validation errors without a detail string", async () => {
+    reply({ definitions: ["This field is required."] }, 400);
+    const result = await call("create_measurement", {
+      definitions: [{ type: "ping", target: "example.com" }],
+      probes: [{ type: "country", value: "FR", requested: 5 }],
+    });
+    expect(result.isError).toBe(true);
+    expect(z.string().parse(result.structuredContent?.message)).toContain("definitions");
+  });
+});
