@@ -41,6 +41,10 @@ const extractDetail = (body: unknown): string | undefined => {
   for (const key of ["detail", "error", "message"]) {
     const value = record[key];
     if (typeof value === "string" && value.length > 0) return value;
+    if (typeof value === "object" && value !== null) {
+      const nested = (value as Record<string, unknown>)["detail"];
+      if (typeof nested === "string" && nested.length > 0) return nested;
+    }
   }
   return undefined;
 };
@@ -145,8 +149,8 @@ export const AtlasLive = (config: Config) => {
     if (status === 401 || status === 403) {
       return yield* new AtlasError({
         code: "AtlasRejected",
-        message:
-          "RIPE Atlas rejected the API key or its permissions. Check the key and its permissions (e.g. create measurements, list your measurements).",
+        message: extractDetail(responseBody) ??
+          "RIPE Atlas rejected the API key or its permissions. Check the key value, enabled flag, validity window, and grants.",
         status,
       });
     }

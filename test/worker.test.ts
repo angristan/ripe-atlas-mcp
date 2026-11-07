@@ -189,11 +189,20 @@ describe("tools", () => {
     expect(content.code).toBe("RateLimited");
   });
 
-  it("maps Atlas 403 to a permissions hint", async () => {
+  it("passes through Atlas's 403 detail", async () => {
     reply({ detail: "You do not have permission to perform this action." }, 403);
     const result = await call("list_my_measurements", {});
     expect(result.isError).toBe(true);
-    expect(z.string().parse(result.structuredContent?.message)).toContain("permissions");
+    expect(z.string().parse(result.structuredContent?.message)).toContain("permission");
+  });
+
+  it("passes through Atlas's 401 detail", async () => {
+    reply({ error: { detail: "The provided API key does not exist" } }, 401);
+    const result = await call("list_probes", {});
+    expect(result.isError).toBe(true);
+    const content = z.object({ code: z.literal("AtlasRejected"), status: z.literal(401), message: z.string() })
+      .parse(result.structuredContent);
+    expect(content.message).toContain("does not exist");
   });
 
   it("create_measurement posts definitions and probes and returns created IDs", async () => {
