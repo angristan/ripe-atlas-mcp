@@ -23,9 +23,41 @@ function validToken(header: string | null, expected: string) {
     crypto.subtle.timingSafeEqual(actualBytes, expectedBytes);
 }
 
+const SERVER_CARD_PATHS = new Set([
+  "/.well-known/mcp/server-card",
+  "/.well-known/mcp/server-card/mcp",
+]);
+
+function serverCard(origin: string) {
+  return {
+    $schema: "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+    name: "me.angristan/ripe-atlas",
+    version: "0.1.0",
+    title: "RIPE Atlas",
+    description:
+      "Query RIPE Atlas probes and measurements, fetch results, and create or stop measurements. Proxied through a Cloudflare Worker; the Atlas API key stays server-side.",
+    icons: [{
+      src: `${origin}/favicon.ico`,
+      sizes: ["64x64"],
+      mimeType: "image/vnd.microsoft.icon",
+    }],
+    remotes: [{
+      type: "streamable-http",
+      url: `${origin}/mcp`,
+      supportedProtocolVersions: ["2025-06-18"],
+    }],
+  };
+}
+
 export default {
   async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
-    if (new URL(request.url).pathname !== "/mcp") return jsonError(404, "Not found.");
+    const { pathname, origin } = new URL(request.url);
+    if (SERVER_CARD_PATHS.has(pathname)) {
+      return Response.json(serverCard(origin), {
+        headers: { "Cache-Control": "public, max-age=300" },
+      });
+    }
+    if (pathname !== "/mcp") return jsonError(404, "Not found.");
     try {
       const config = await Effect.runPromise(
         loadConfig(env).pipe(Effect.match({

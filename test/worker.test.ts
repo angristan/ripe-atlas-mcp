@@ -89,10 +89,26 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("routing, authentication and configuration", () => {
   it("rejects non-/mcp paths", async () => {
-    const response = await dispatch(new Request("https://ripe-atlas-mcp.example/favicon.svg", {
+    const response = await dispatch(new Request("https://ripe-atlas-mcp.example/other", {
       headers: { Authorization: `Bearer ${bindings.MCP_AUTH_TOKEN}` },
     }));
     expect(response.status).toBe(404);
+  });
+
+  it("serves a public MCP server card with the favicon as icon, without credentials", async () => {
+    const response = await dispatch(new Request("https://ripe-atlas-mcp.example/.well-known/mcp/server-card/mcp"));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("WWW-Authenticate")).toBeNull();
+    const card = z.object({
+      name: z.string(),
+      title: z.string(),
+      icons: z.array(z.object({ src: z.string() })),
+      remotes: z.array(z.object({ url: z.string() })),
+    }).parse(await response.json());
+    expect(card.title).toBe("RIPE Atlas");
+    expect(card.icons[0]?.src).toBe("https://ripe-atlas-mcp.example/favicon.ico");
+    expect(card.remotes[0]?.url).toBe("https://ripe-atlas-mcp.example/mcp");
+    expect(outgoing).not.toHaveBeenCalled();
   });
 
   it.each(["", "Bearer wrong", "Basic abc", `Bearer ${"x".repeat(43)}`])("rejects invalid credentials: %s", async (authorization) => {
