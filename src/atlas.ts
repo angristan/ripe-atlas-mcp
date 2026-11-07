@@ -266,14 +266,20 @@ export const AtlasLive = (config: Config) => {
           is_oneoff: input.is_oneoff,
           ...(input.bill_to === undefined ? {} : { bill_to: input.bill_to }),
         });
-        // A successful POST returns the IDs of the created measurements.
-        yield* Schema.decodeUnknownEffect(Schema.Union([Schema.Number, Schema.Array(Schema.Number)]))(body).pipe(
+        // A successful POST returns {"measurements": [ids]} (older docs: bare ids).
+        const Created = Schema.Union([
+          Schema.Struct({ measurements: Schema.Array(Schema.Number) }),
+          Schema.Array(Schema.Number),
+          Schema.Number,
+        ]);
+        const decoded = yield* Schema.decodeUnknownEffect(Created)(body).pipe(
           Effect.mapError(() => new AtlasError({
             code: "InvalidResponse",
             message: `Unexpected create response: ${JSON.stringify(body)?.slice(0, 400)}`,
           })),
         );
-        return { created_ids: body };
+        const ids = typeof decoded === "number" ? [decoded] : Array.isArray(decoded) ? decoded : decoded.measurements;
+        return { created_ids: ids };
       }
       case "stop_measurement": {
         const measurementId = operation.input.measurement_id;

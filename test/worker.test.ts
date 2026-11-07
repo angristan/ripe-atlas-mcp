@@ -206,7 +206,7 @@ describe("tools", () => {
   });
 
   it("create_measurement posts definitions and probes and returns created IDs", async () => {
-    reply([111]);
+    reply({ measurements: [111] });
     const result = await call("create_measurement", {
       definitions: [{ type: "ping", target: "example.com", af: 4, packets: 3 }],
       probes: [{ type: "country", value: "NL", requested: 10 }],
