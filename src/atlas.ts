@@ -268,7 +268,10 @@ export const AtlasLive = (config: Config) => {
         });
         // A successful POST returns the IDs of the created measurements.
         yield* Schema.decodeUnknownEffect(Schema.Union([Schema.Number, Schema.Array(Schema.Number)]))(body).pipe(
-          Effect.mapError(invalidResponse),
+          Effect.mapError(() => new AtlasError({
+            code: "InvalidResponse",
+            message: `Unexpected create response: ${JSON.stringify(body)?.slice(0, 400)}`,
+          })),
         );
         return { created_ids: body };
       }
