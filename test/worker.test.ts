@@ -206,7 +206,7 @@ describe("tools", () => {
   });
 
   it("create_measurement posts definitions and probes and returns created IDs", async () => {
-    reply([{ id: 111, status: "Ongoing" }]);
+    reply([111]);
     const result = await call("create_measurement", {
       definitions: [{ type: "ping", target: "example.com", af: 4, packets: 3 }],
       probes: [{ type: "country", value: "NL", requested: 10 }],
@@ -222,9 +222,9 @@ describe("tools", () => {
       is_oneoff: z.literal(true),
     }).parse(JSON.parse(z.string().parse(init.body)));
     expect(body.definitions[0]?.target).toBe("example.com");
-    const content = z.object({ created: z.array(z.object({ id: z.number() })) })
+    const content = z.object({ created_ids: z.array(z.number()) })
       .parse(result.structuredContent);
-    expect(content.created[0]?.id).toBe(111);
+    expect(content.created_ids[0]).toBe(111);
   });
 
   it("stop_measurement patches is_stopped", async () => {

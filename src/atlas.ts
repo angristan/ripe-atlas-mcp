@@ -266,10 +266,11 @@ export const AtlasLive = (config: Config) => {
           is_oneoff: input.is_oneoff,
           ...(input.bill_to === undefined ? {} : { bill_to: input.bill_to }),
         });
-        yield* Schema.decodeUnknownEffect(Schema.Union([HasId, Schema.Array(HasId)]))(body).pipe(
+        // A successful POST returns the IDs of the created measurements.
+        yield* Schema.decodeUnknownEffect(Schema.Union([Schema.Number, Schema.Array(Schema.Number)]))(body).pipe(
           Effect.mapError(invalidResponse),
         );
-        return { created: body };
+        return { created_ids: body };
       }
       case "stop_measurement": {
         const measurementId = operation.input.measurement_id;
