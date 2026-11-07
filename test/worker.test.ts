@@ -300,3 +300,20 @@ describe("atlas error detail", () => {
     expect(z.string().parse(result.structuredContent?.message)).toContain("400");
   });
 });
+
+describe("results endpoint bare array", () => {
+  it("accepts a bare array response and summarizes it", async () => {
+    reply([{ prb_id: 1, result: [{ rtt: 5 }, { rtt: 7 }] }]);
+    const result = await call("get_measurement_results", { measurement_id: 9 });
+    expect(result.isError).toBeFalsy();
+    const content = z.object({
+      count: z.literal(1),
+      pages_fetched: z.literal(1),
+      next: z.null(),
+      results: z.array(z.unknown()),
+      summary: z.object({ samples: z.literal(2), min_ms: z.literal(5), avg_ms: z.literal(6), max_ms: z.literal(7) }),
+    }).parse(result.structuredContent);
+    expect(content.results).toHaveLength(1);
+    expect(outgoing).toHaveBeenCalledTimes(1);
+  });
+});

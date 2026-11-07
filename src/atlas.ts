@@ -10,6 +10,8 @@ const ListEnvelope = Schema.Struct({
   previous: Schema.NullOr(Schema.String),
   results: Schema.Array(Schema.Unknown),
 });
+// Results endpoints return a bare array; list endpoints return the envelope.
+const ListResponse = Schema.Union([ListEnvelope, Schema.Array(Schema.Unknown)]);
 const HasId = Schema.Struct({ id: Schema.Number });
 
 type ErrorCode =
@@ -184,16 +186,24 @@ export const AtlasLive = (config: Config) => {
     let next: string | null = null;
     while (pagesFetched < maxPages) {
       const body = yield* request("GET", url, undefined);
-      const envelope = yield* Schema.decodeUnknownEffect(ListEnvelope)(body).pipe(
+      const decoded = yield* Schema.decodeUnknownEffect(ListResponse)(body).pipe(
         Effect.mapError(() => new AtlasError({
           code: "InvalidResponse",
           message: `Unexpected list response from ${url}: ${JSON.stringify(body)?.slice(0, 300)}`,
         })),
       );
-      count = envelope.count;
-      results.push(...envelope.results);
+      if (!("results" in decoded)) {
+        // Bare array (results endpoint): no pagination.
+        count = decoded.length;
+        results.push(...decoded);
+        pagesFetched = 1;
+        next = null;
+        break;
+      }
+      count = decoded.count;
+      results.push(...decoded.results);
       pagesFetched += 1;
-      next = envelope.next;
+      next = decoded.next;
       if (next === null || pagesFetched >= maxPages) break;
       if (!next.startsWith(API_BASE)) {
         return yield* new AtlasError({
