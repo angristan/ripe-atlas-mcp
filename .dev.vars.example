@@ -1,0 +1,2 @@
+RIPE_ATLAS_API_KEY="replace-with-your-ripe-atlas-api-key"
+MCP_AUTH_TOKEN="replace-with-a-random-token-of-at-least-32-characters"
