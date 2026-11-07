@@ -29,7 +29,7 @@ Built with [Effect v4](https://effect.website/) and Cloudflare's [Agents SDK](ht
 
 Requires Bun and Node.js 22 or 24+.
 
-1. Create a RIPE Atlas API key: log in at [atlas.ripe.net](https://atlas.ripe.net) with your RIPE NCC Access account, then account menu → **API Keys** → new key. Choose the **My Resources API key** preset (it covers creating measurements and listing your measurements; the Maintainer preset is only for managing probes you host). The key value is shown only once — copy it immediately.
+1. Create a RIPE Atlas API key: log in at [atlas.ripe.net](https://atlas.ripe.net) with your RIPE NCC Access account, then account menu → **API Keys** → new key. The **Key type** dropdown (Maintainer / My Resources / IP Analyser) is only a preset of grants, and options that don't apply to your account are greyed out — that's fine. Pick any available type, then add these grants manually in the Permission dropdown: **Create new measurement** and **List your measurements** (target: all). The key value is shown only once — copy it immediately.
 2. Generate an MCP token: `openssl rand -hex 32`. Do not reuse the Atlas key.
 
 ```sh
