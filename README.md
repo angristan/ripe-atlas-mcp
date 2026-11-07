@@ -120,6 +120,12 @@ vibe mcp add ripe-atlas \
   --api-key-env RIPE_ATLAS_MCP_TOKEN
 ```
 
+## CI/CD
+
+The GitHub repo (`angristan/ripe-atlas-mcp`, branch `main`) is connected to this Worker via Workers Builds: every push to `main` runs `bun install --frozen-lockfile && bun run typecheck && bun run test` and then `bunx wrangler deploy`. The trigger lives in Cloudflare control-plane state (Builds API), not in this repo. Secrets are **not** set by builds; manage them with `wrangler secret put`.
+
+Observability is fully enabled (logs, traces, invocation logs at 100% sampling) — see the Worker's Logs/Traces tabs in the dashboard or `wrangler tail`.
+
 ## Development
 
 ```sh
