@@ -278,7 +278,7 @@ export const AtlasLive = (config: Config) => {
             message: `Unexpected create response: ${JSON.stringify(body)?.slice(0, 400)}`,
           })),
         );
-        const ids = typeof decoded === "number" ? [decoded] : Array.isArray(decoded) ? decoded : decoded.measurements;
+        const ids = typeof decoded === "number" ? [decoded] : "measurements" in decoded ? decoded.measurements : decoded;
         return { created_ids: ids };
       }
       case "stop_measurement": {
