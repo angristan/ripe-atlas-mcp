@@ -297,5 +297,6 @@ describe("atlas error detail", () => {
     });
     expect(result.isError).toBe(true);
     expect(z.string().parse(result.structuredContent?.message)).toContain("definitions");
+    expect(z.string().parse(result.structuredContent?.message)).toContain("400");
   });
 });

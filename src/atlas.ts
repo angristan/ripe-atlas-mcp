@@ -158,9 +158,9 @@ export const AtlasLive = (config: Config) => {
       const detail = extractDetail(responseBody);
       return yield* new AtlasError({
         code: "AtlasRejected",
-        message: detail ?? (status === 400
-          ? `RIPE Atlas rejected the request: ${JSON.stringify(responseBody)?.slice(0, 500)}`
-          : "RIPE Atlas rejected the request. Check the parameters."),
+        message: status === 400
+          ? `RIPE Atlas rejected the request (400): ${JSON.stringify(responseBody)?.slice(0, 600)}`
+          : detail ?? "RIPE Atlas rejected the request. Check the parameters.",
         status,
       });
     }
